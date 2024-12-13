@@ -19,17 +19,13 @@ import com.github.burrunan.s3cache.AwsS3BuildCache
 import org.gradle.caching.BuildCacheService
 import org.gradle.caching.BuildCacheServiceFactory
 import org.slf4j.LoggerFactory
-import software.amazon.awssdk.auth.credentials.AnonymousCredentialsProvider
-import software.amazon.awssdk.auth.credentials.AwsBasicCredentials
-import software.amazon.awssdk.auth.credentials.AwsSessionCredentials
-import software.amazon.awssdk.auth.credentials.ProfileCredentialsProvider
-import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider
-import software.amazon.awssdk.auth.credentials.WebIdentityTokenFileCredentialsProvider
+import software.amazon.awssdk.auth.credentials.*
 import software.amazon.awssdk.regions.Region
 import software.amazon.awssdk.services.s3.S3Client
 import software.amazon.awssdk.services.s3.S3ClientBuilder
 import software.amazon.awssdk.services.s3.S3Configuration
 import java.net.URI
+import java.nio.file.FileSystems
 
 private val logger = LoggerFactory.getLogger(AwsS3BuildCacheServiceFactory::class.java)
 
@@ -113,7 +109,7 @@ class AwsS3BuildCacheServiceFactory : BuildCacheServiceFactory<AwsS3BuildCache> 
             config.awsWebIdentityTokenFile != null ->
                 WebIdentityTokenFileCredentialsProvider.builder().apply {
                     this.roleArn(config.awsRoleARN)
-                    this.webIdentityTokenFile(config.awsWebIdentityTokenFile?.let { java.nio.file.Path.of(it) })
+                    this.webIdentityTokenFile(FileSystems.getDefault().getPath(config.awsWebIdentityTokenFile!!))
                 }.build()
 
             config.awsAccessKeyId.isNullOrBlank() || config.awsSecretKey.isNullOrBlank() ->
